@@ -1,1 +1,21 @@
-// app global css in SCSS form
+.q-drawer {
+  .q-item {
+    opacity: 0.6; // normal items
+    transition:
+      opacity 0.3s ease,
+      background-color 0.3s ease,
+      color 0.3s ease,
+      font-size 0.3s ease,
+      font-weight 0.3s ease; // smooth transition for all changes
+
+    &.q-item--active,
+    &.q-router-link--active,
+    &.q-router-link--exact-active {
+      opacity: 1;
+      color: inherit; // remove default blue
+      font-weight: bold;
+      font-size: larger;
+      background-color: #e4e4e488; // custom dark background
+    }
+  }
+}

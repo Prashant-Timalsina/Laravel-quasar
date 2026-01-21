@@ -8,8 +8,8 @@
       font-size 0.3s ease,
       font-weight 0.3s ease; // smooth transition for all changes
 
-    &.q-item--active,
-    &.q-router-link--active,
+    // &.q-item--active,
+    // &.q-router-link--active,
     &.q-router-link--exact-active {
       opacity: 1;
       color: inherit; // remove default blue

@@ -20,3 +20,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('notes',NoteController::class);
 });
+
+
+// backend/routes/api.php
+Route::get('/test', function () {
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'CORS working'
+    ]);
+});
+

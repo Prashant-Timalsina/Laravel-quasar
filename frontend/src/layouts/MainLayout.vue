@@ -7,7 +7,12 @@
         <!-- Centered title using flex auto margins -->
         <q-toolbar-title class="text-center"> Notes App </q-toolbar-title>
 
-        <q-btn @click="moveToLogin">Login</q-btn>
+        <div v-if="authStore.isLoggedIn" class="row items-center">
+          <q-btn flat no-caps :label="`Hi, ${authStore.user?.name}`" icon="person" />
+          <q-btn flat round icon="logout" @click="handleLogout" />
+        </div>
+
+        <q-btn v-else flat label="Login" @click="moveToLogin" />
       </q-toolbar>
     </q-header>
 
@@ -33,10 +38,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import NavBar from 'components/Nav/NavBar.vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from 'src/stores/auth'
 
+const authStore = useAuthStore()
 const router = useRouter()
 
 const navLinks = [
@@ -66,4 +73,16 @@ function toggleLeftDrawer() {
 function moveToLogin() {
   router.push('/login')
 }
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/login')
+}
+
+onMounted(() => {
+  // Fetch user if token exists
+  if (localStorage.getItem('token')) {
+    authStore.fetchUser()
+  }
+})
 </script>

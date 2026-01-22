@@ -1,40 +1,46 @@
 <template>
-  <q-page class="row justify-center">
-    <q-card class="q-pa-md" style="min-width: 500px">
-      <q-card-section>
-        <div class="text-h6">Add Note</div>
+  <q-page>
+    <div class="row justify-center q-pt-xl">
+      <q-card class="q-pa-md" style="min-width: 500px">
+        <q-card-section>
+          <div class="text-h6">Add Note</div>
 
-        <q-form @submit.prevent="submitForm" ref="formRef">
-          <q-input
-            v-model="form.title"
-            label="Title"
-            outlined
-            clearable
-            class="q-mb-md"
-            placeholder="Enter title"
-            required
-          />
-          <q-input
-            type="textarea"
-            v-model="form.content"
-            label="Content"
-            outlined
-            clearable
-            class="q-mb-md"
-            placeholder="Enter content"
-            required
-          />
-          <q-btn type="submit" label="Submit" color="primary" />
-        </q-form>
-      </q-card-section>
-    </q-card>
+          <q-form @submit.prevent="submitForm" ref="formRef">
+            <q-input
+              v-model="form.title"
+              label="Title"
+              outlined
+              clearable
+              class="q-mb-md"
+              placeholder="Enter title"
+              required
+            />
+            <q-input
+              type="textarea"
+              v-model="form.content"
+              label="Content"
+              outlined
+              clearable
+              class="q-mb-md"
+              placeholder="Enter content"
+              required
+            />
+            <q-btn type="submit" label="Submit" color="primary" />
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </div>
   </q-page>
 </template>
 
 <script setup>
+import { Notify } from 'quasar'
 import { api } from 'src/boot/axios'
 import { baseURL } from 'src/constants'
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const form = reactive({
   title: '',
@@ -50,6 +56,11 @@ async function submitForm() {
     note: form.content,
   })
   console.log('Response from server:', response.data)
+  Notify.create({
+    type: 'positive',
+    message: 'Note created successfully!',
+  })
+  router.push('/lists')
   resetForm()
 
   formRef.value.reset()

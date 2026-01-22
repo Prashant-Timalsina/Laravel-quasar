@@ -7,15 +7,28 @@ export const useNotesStore = defineStore('notes', {
   state: () => ({
     notes: [], // Change this to an array
     loading: false,
+    pagination: {
+      page: 1,
+      rowsPerPage: 10,
+      rowsNumber: 0,
+    },
   }),
   actions: {
-    async fetchNotes() {
+    async fetchNotes(page = 1, perPage = 10) {
       this.loading = true
       try {
-        const response = await api.get(`${baseURL}/notes`)
+        const response = await api.get(`${baseURL}/notes`, {
+          params: {
+            page,
+            per_page: perPage,
+          },
+        })
 
         // Laravel Pagination wraps the array in response.data.data
         this.notes = response.data.data
+        this.pagination.page = response.data.current_page
+        this.pagination.rowsPerPage = response.data.per_page
+        this.pagination.rowsNumber = response.data.total
 
         console.log('Notes loaded:', this.notes)
       } catch (error) {

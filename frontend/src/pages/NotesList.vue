@@ -7,8 +7,11 @@
         flat
         bordered
         row-key="id"
+        :loading="notesStore.loading"
         class="my-sticky-header-table"
         style="min-width: 800px; max-width: 100%"
+        v-model:pagination="notesStore.pagination"
+        @request="onRequest"
       >
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
@@ -96,8 +99,13 @@ const selectedNote = ref(null)
 const isEditMode = ref(false)
 const submitting = ref(false)
 
+const onRequest = (props) => {
+  const { page, rowsPerPage } = props.pagination
+  notesStore.fetchNotes(page, rowsPerPage)
+}
+
 onMounted(() => {
-  notesStore.fetchNotes()
+  notesStore.fetchNotes(notesStore.pagination.page, notesStore.pagination.rowsPerPage)
 })
 
 const columns = [

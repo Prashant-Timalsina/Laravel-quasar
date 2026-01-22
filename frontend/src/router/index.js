@@ -33,5 +33,16 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   })
 
+  Router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem('token')
+
+    // If token exists and user is trying to access login page, redirect to home
+    if (token && to.path === '/') {
+      next('/home')
+    } else {
+      next()
+    }
+  })
+
   return Router
 })

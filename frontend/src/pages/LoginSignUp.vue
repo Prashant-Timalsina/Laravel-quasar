@@ -158,7 +158,7 @@ async function submitHandler() {
     formRef.value.resetValidation()
     resetForm()
 
-    router.push('/')
+    router.push('/home')
   } catch (err) {
     console.error('--- API Error ---', err)
 

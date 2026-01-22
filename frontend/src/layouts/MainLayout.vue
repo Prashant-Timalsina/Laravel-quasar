@@ -27,7 +27,7 @@
       v-model="leftDrawerOpen"
       :style="{ backgroundColor: '#f2f2f2' }"
       :width="200"
-      :breakpoint="767"
+      :breakpoint="900"
       show-if-above
       bordered
     >
@@ -57,7 +57,7 @@ const navLinks = [
   {
     title: 'Home',
     icon: 'account_circle',
-    link: '/',
+    link: '/home',
   },
   {
     title: 'Create',
@@ -78,16 +78,16 @@ function toggleLeftDrawer() {
 }
 
 function moveToLogin() {
-  router.push('/login')
+  router.push('/')
 }
 
 const handleLogout = () => {
   authStore.logout()
-  router.push('/login')
+  router.push('/')
 }
 
 const homeRoute = () => {
-  router.push('/')
+  router.push('/home')
 }
 
 onMounted(() => {

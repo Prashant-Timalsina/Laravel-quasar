@@ -20,7 +20,7 @@ class NoteController extends Controller
      */
     public function index(Request $request)
     {
-        $notes = $request->user()->notes()->latest()->paginate(10);
+        $notes = $request->user()->notes()->latest()->paginate(6);
         return response()->json($notes);
     }
 

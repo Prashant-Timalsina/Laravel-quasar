@@ -9,12 +9,12 @@ export const useNotesStore = defineStore('notes', {
     loading: false,
     pagination: {
       page: 1,
-      rowsPerPage: 10,
+      rowsPerPage: 6,
       rowsNumber: 0,
     },
   }),
   actions: {
-    async fetchNotes(page = 1, perPage = 10) {
+    async fetchNotes(page = 1, perPage = 6) {
       this.loading = true
       try {
         const response = await api.get(`${baseURL}/notes`, {

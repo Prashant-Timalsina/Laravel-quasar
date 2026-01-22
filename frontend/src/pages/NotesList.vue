@@ -1,7 +1,7 @@
 <template>
   <q-page class="q-pa-md">
     <div class="flex flex-center">
-      <q-table
+      <!-- <q-table
         :rows="notesStore.notes"
         :columns="columns"
         flat
@@ -12,42 +12,60 @@
         style="min-width: 800px; max-width: 100%"
         v-model:pagination="notesStore.pagination"
         @request="onRequest"
+      > -->
+      <q-table
+        grid
+        flat
+        bordered
+        :rows="notesStore.notes"
+        :columns="columns"
+        row-key="id"
+        v-model:pagination="notesStore.pagination"
+        :rows-per-page-options="[]"
+        @request="onRequest"
       >
-        <template v-slot:body-cell-actions="props">
-          <q-td :props="props">
-            <div class="row no-wrap q-gutter-x-xs">
-              <q-btn
-                size="sm"
-                flat
-                round
-                color="secondary"
-                icon="visibility"
-                @click="viewNote(props.row, 'view')"
-              >
-                <q-tooltip>View</q-tooltip>
-              </q-btn>
-              <q-btn
-                size="sm"
-                flat
-                round
-                color="primary"
-                icon="edit"
-                @click="editRow(props.row, 'edit')"
-              >
-                <q-tooltip>Edit</q-tooltip>
-              </q-btn>
-              <q-btn
-                size="sm"
-                flat
-                round
-                color="negative"
-                icon="delete"
-                @click="deleteRow(props.row)"
-              >
-                <q-tooltip>Delete</q-tooltip>
-              </q-btn>
-            </div>
-          </q-td>
+        <template v-slot:item="props">
+          <div class="q-pa-sm col-xs-12 col-sm-6 col-md-4">
+            <q-card bordered flat>
+              <q-card-section>
+                <div class="text-h6 note-clamp-title">
+                  {{ props.row.title }}
+                </div>
+                <div class="text-body2 text-grey-7 q-mt-sm note-clamp">
+                  {{ props.row.note }}
+                </div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-card-actions align="right">
+                <q-btn
+                  size="sm"
+                  flat
+                  round
+                  color="secondary"
+                  icon="visibility"
+                  @click="viewNote(props.row, 'view')"
+                />
+                <q-btn
+                  size="sm"
+                  flat
+                  round
+                  color="primary"
+                  icon="edit"
+                  @click="editRow(props.row, 'edit')"
+                />
+                <q-btn
+                  size="sm"
+                  flat
+                  round
+                  color="negative"
+                  icon="delete"
+                  @click="deleteRow(props.row)"
+                />
+              </q-card-actions>
+            </q-card>
+          </div>
         </template>
       </q-table>
     </div>
@@ -175,3 +193,15 @@ function deleteRow(row) {
   }
 }
 </script>
+
+<style lang="css" scoped>
+.note-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* number of lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  &_title {
+    -webkit-line-clamp: 1; /* number of lines */
+  }
+}
+</style>

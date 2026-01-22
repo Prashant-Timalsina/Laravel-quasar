@@ -27,7 +27,11 @@
 </template>
 
 <script setup>
+import { useNotesStore } from 'src/stores/notes'
 import { ref } from 'vue'
+
+const notesStore = useNotesStore()
+notesStore.fetchNotes()
 
 const columns = [
   { name: 'title', label: 'Title', align: 'left', field: 'title' },

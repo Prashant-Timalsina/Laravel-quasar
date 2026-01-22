@@ -24,6 +24,7 @@ export const useAuthStore = defineStore('auth', {
         const response = await api.get(`${baseURL}/me`)
         this.user = response.data
         this.isLoggedIn = true
+        console.log(response.data)
         return response.data
       } catch (err) {
         console.log('Error fetching user:', err)

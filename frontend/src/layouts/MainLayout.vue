@@ -7,7 +7,7 @@
         <!-- Centered title using flex auto margins -->
         <q-toolbar-title class="text-center"> Notes App </q-toolbar-title>
 
-        <q-btn>Login</q-btn>
+        <q-btn @click="moveToLogin">Login</q-btn>
       </q-toolbar>
     </q-header>
 
@@ -35,6 +35,9 @@
 <script setup>
 import { ref } from 'vue'
 import NavBar from 'components/Nav/NavBar.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const navLinks = [
   {
@@ -58,5 +61,9 @@ const leftDrawerOpen = ref(false)
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
+}
+
+function moveToLogin() {
+  router.push('/login')
 }
 </script>

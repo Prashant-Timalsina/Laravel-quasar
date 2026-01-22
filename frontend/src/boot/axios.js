@@ -9,14 +9,36 @@ import axios from 'axios'
 // for each client)
 // const api = axios.create({ baseURL: 'https://api.example.com' })
 
+export const api = axios.create({
+  baseURL: 'http://localhost:8000/api',
+  withCredentials: true,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
+})
+
+// Add token to headers if it exists in localStorage
+const token = localStorage.getItem('token')
+if (token) {
+  api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+}
+
+// Add response interceptor to handle 401 errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear token on 401
+      localStorage.removeItem('token')
+      delete api.defaults.headers.common['Authorization']
+    }
+    return Promise.reject(error)
+  },
+)
+
 export default defineBoot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
-
-  const api = axios.create({
-    baseURL: 'http://localhost:8000/api',
-    withCredentials: true,
-    headers: { Accept: 'application/json' },
-  })
 
   app.config.globalProperties.$axios = axios
   // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)

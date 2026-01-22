@@ -7,30 +7,21 @@
 
           <q-form @submit.prevent="submitHandler" ref="formRef">
             <q-input
-              v-if="loginState === 'register'"
-              v-model="userForm.userName"
-              outlined
-              clearable
-              label="User Name"
-              class="q-mb-md"
-              required
-            />
-            <q-input
-              v-if="loginState === 'register'"
-              v-model="userForm.DOB"
-              outlined
-              clearable
-              label="DOB"
-              class="q-mb-md"
-              required
-            />
-
-            <q-input
               type="email"
               v-model="userForm.email"
               outlined
               clearable
               label="Email"
+              class="q-mb-md"
+              required
+            />
+
+            <q-input
+              v-if="loginState === 'register'"
+              v-model="userForm.userName"
+              outlined
+              clearable
+              label="User Name"
               class="q-mb-md"
               required
             />
@@ -42,7 +33,16 @@
               clearable
               label="Password"
               class="q-mb-md"
-              required
+              lazy-rules
+              :rules="[
+                (val) => !!val || 'Password is required',
+                (val) => !/\s/.test(val) || 'Spaces are not allowed',
+                (val) => val.length >= 8 || 'Minimum 8 characters',
+                (val) =>
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+                    val,
+                  ) || 'Must include uppercase, lowercase, number and special character',
+              ]"
             >
               <template v-slot:append>
                 <q-icon
@@ -63,7 +63,22 @@
               <a @click="ref((loginState = 'login'))">Login Here</a>
             </p>
 
-            <q-btn label="Login" type="submit" color="primary" class="full-width" />
+            <q-btn
+              v-if="loginState === 'login'"
+              label="Login"
+              type="submit"
+              color="primary"
+              class="full-width"
+              @click="loginUser"
+            />
+            <q-btn
+              v-if="loginState === 'register'"
+              label="Register"
+              type="submit"
+              color="primary"
+              class="full-width"
+              @click="registerUser"
+            />
           </q-form>
         </q-card-section>
       </q-card>
@@ -80,15 +95,33 @@ const userForm = reactive({
   email: '',
   password: '',
   userName: '',
-  DOB: '',
 })
 
 const showPassword = ref(false)
 const formRef = ref(null)
 
-function submitHandler() {
-  alert(`${userForm.email} ${userForm.password}`)
-  formRef.value.reset()
+async function submitHandler() {
+  const success = await formRef.value.validate()
+  if (success) {
+    alert(`${userForm.email} ${userForm.password}`)
+    formRef.value.resetValidation()
+
+    // 2. Clear the actual data
+    userForm.email = ''
+    userForm.password = ''
+    userForm.userName = ''
+  } else {
+    alert('Validation failed')
+  }
+}
+function loginUser() {
+  // Implement login logic here
+  console.log('Logging in with', userForm.email, userForm.password)
+}
+
+function registerUser() {
+  // Implement registration logic here
+  console.log('Registering with', userForm.userName, userForm.email, userForm.password)
 }
 </script>
 

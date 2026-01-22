@@ -8,7 +8,13 @@
         <q-toolbar-title class="text-center"> Notes App </q-toolbar-title>
 
         <div v-if="authStore.isLoggedIn" class="row items-center">
-          <q-btn flat no-caps :label="`Hi, ${authStore.user?.name}`" icon="person" />
+          <q-btn
+            flat
+            no-caps
+            :label="`Hi, ${authStore.user?.name}`"
+            @click="homeRoute"
+            icon="person"
+          />
           <q-btn flat round icon="logout" @click="handleLogout" />
         </div>
 
@@ -17,6 +23,7 @@
     </q-header>
 
     <q-drawer
+      v-if="authStore.isLoggedIn"
       v-model="leftDrawerOpen"
       :style="{ backgroundColor: '#f2f2f2' }"
       :width="200"
@@ -49,7 +56,7 @@ const router = useRouter()
 const navLinks = [
   {
     title: 'Home',
-    icon: 'home',
+    icon: 'account_circle',
     link: '/',
   },
   {
@@ -58,9 +65,9 @@ const navLinks = [
     link: '/create',
   },
   {
-    title: 'Profile',
-    icon: 'account_circle',
-    link: '/profile',
+    title: 'Notes List',
+    icon: 'list',
+    link: '/lists',
   },
 ]
 
@@ -77,6 +84,10 @@ function moveToLogin() {
 const handleLogout = () => {
   authStore.logout()
   router.push('/login')
+}
+
+const homeRoute = () => {
+  router.push('/')
 }
 
 onMounted(() => {

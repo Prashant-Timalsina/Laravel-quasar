@@ -24,5 +24,34 @@ export const useNotesStore = defineStore('notes', {
         this.loading = false
       }
     },
+    // 2. Fetch single note by ID (used for the "View" button)
+    async fetchNoteById(id) {
+      try {
+        const response = await api.get(`/notes/${id}`)
+        return response.data
+      } catch (error) {
+        console.error('Error fetching note details:', error)
+        throw error
+      }
+    },
+
+    // 3. Update existing note
+    async updateNote(id, updatedData) {
+      try {
+        const response = await api.put(`/notes/${id}`, updatedData)
+        return response.data
+      } catch (error) {
+        console.error('Error updating note:', error)
+        throw error
+      }
+    },
+    async deleteNote(id) {
+      try {
+        const response = await api.delete(`${baseURL}/notes/${id}`)
+        console.log(response)
+      } catch (err) {
+        console.log(err)
+      }
+    },
   },
 })

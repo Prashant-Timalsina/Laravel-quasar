@@ -15,6 +15,7 @@
             required
           />
           <q-input
+            type="textarea"
             v-model="form.content"
             label="Content"
             outlined
@@ -31,6 +32,8 @@
 </template>
 
 <script setup>
+import { api } from 'src/boot/axios'
+import { baseURL } from 'src/constants'
 import { reactive, ref } from 'vue'
 
 const form = reactive({
@@ -39,10 +42,21 @@ const form = reactive({
 })
 
 const formRef = ref(null)
-function submitForm() {
-  console.log('Form Submitted:', form)
-  alert(`Note is: ${form.title} ${form.content}`)
+async function submitForm() {
+  console.log('Form submitted:', form)
+  // Reset the form after submission
+  const response = await api.post(`${baseURL}/notes`, {
+    title: form.title,
+    note: form.content,
+  })
+  console.log('Response from server:', response.data)
+  resetForm()
 
   formRef.value.reset()
+}
+
+function resetForm() {
+  form.title = ''
+  form.content = ''
 }
 </script>

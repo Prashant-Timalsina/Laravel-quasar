@@ -1,66 +1,169 @@
 <template>
-  <q-page>
+  <q-page class="q-pa-md">
     <div class="flex flex-center">
       <q-table
-        :rows="placeData"
+        :rows="notesStore.notes"
         :columns="columns"
         flat
         bordered
-        style="min-width: 600px; width: auto; height: auto"
+        row-key="id"
+        class="my-sticky-header-table"
+        style="min-width: 800px; max-width: 100%"
       >
-        <!-- Slot for Actions column -->
-
         <template v-slot:body-cell-actions="props">
-          <q-td>
-            <q-btn dense flat color="primary" label="Edit" @click="editRow(props.row)" />
-          </q-td>
-          <q-td>
-            <q-btn dense flat color="negative" label="Delete" @click="deleteRow(props.row)" />
-          </q-td>
-          <q-td>
-            <q-btn dense flat color="secondary" label="View" @click="viewNote(props.row)" />
+          <q-td :props="props">
+            <div class="row no-wrap q-gutter-x-xs">
+              <q-btn
+                size="sm"
+                flat
+                round
+                color="secondary"
+                icon="visibility"
+                @click="viewNote(props.row, 'view')"
+              >
+                <q-tooltip>View</q-tooltip>
+              </q-btn>
+              <q-btn
+                size="sm"
+                flat
+                round
+                color="primary"
+                icon="edit"
+                @click="editRow(props.row, 'edit')"
+              >
+                <q-tooltip>Edit</q-tooltip>
+              </q-btn>
+              <q-btn
+                size="sm"
+                flat
+                round
+                color="negative"
+                icon="delete"
+                @click="deleteRow(props.row)"
+              >
+                <q-tooltip>Delete</q-tooltip>
+              </q-btn>
+            </div>
           </q-td>
         </template>
       </q-table>
+    </div>
+    <div v-if="selectedNote" class="row justify-center">
+      <q-card style="width: 800px" flat bordered>
+        <q-card-section class="row items-center">
+          <div class="text-h6">
+            {{ isEditMode ? 'Edit Note' : 'View Note' }}
+          </div>
+          <q-space />
+
+          <q-btn icon="close" flat round dense @click="selectedNote = null" />
+        </q-card-section>
+        <q-separator></q-separator>
+        <q-card-section>
+          <q-form @submit.prevent="updateNote">
+            <q-input v-model="selectedNote.title" label="Title" filled :readonly="!isEditMode" />
+            <q-input
+              v-model="selectedNote.note"
+              label="Note"
+              type="textarea"
+              filled
+              :readonly="!isEditMode"
+              class="q-mt-md"
+            />
+
+            <div v-if="isEditMode" class="row q-gutter-sm">
+              <q-btn label="Update Note" type="submit" color="primary" :loading="submitting" />
+              <q-btn label="Cancel" flat @click="isEditMode = false" />
+            </div>
+
+            <div v-else class="text-center text-grey-7 q-pa-xl">
+              <q-icon name="info" size="lg" />
+              <p>Select edit button to edit myan</p>
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
     </div>
   </q-page>
 </template>
 
 <script setup>
 import { useNotesStore } from 'src/stores/notes'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const notesStore = useNotesStore()
-notesStore.fetchNotes()
+const selectedNote = ref(null)
+const isEditMode = ref(false)
+const submitting = ref(false)
+
+onMounted(() => {
+  notesStore.fetchNotes()
+})
 
 const columns = [
-  { name: 'title', label: 'Title', align: 'left', field: 'title' },
-  { name: 'content', label: 'Content', align: 'left', field: 'content' },
+  {
+    name: 'title',
+    label: 'Title',
+    align: 'left',
+    field: 'title',
+    format: (val) => {
+      if (!val) return ''
+      return val.length > 20 ? `${val.substring(0, 20)}...` : val
+    },
+    sortable: true,
+  },
+  {
+    name: 'note',
+    label: 'Note',
+    align: 'left',
+    field: 'note',
+    format: (val) => {
+      if (!val) return ''
+      return val.length > 60 ? `${val.substring(0, 60)}...` : val
+    },
+    sortable: true,
+  },
   { name: 'actions', label: 'Actions', align: 'left', field: 'actions' },
 ]
 
-const placeData = ref([
-  { id: 1, title: 'Meeting Notes', content: 'Discuss project milestones and deadlines.' },
-  { id: 2, title: 'Shopping List', content: 'Milk, Eggs, Bread, Butter, Apples.' },
-  { id: 3, title: 'Workout Plan', content: 'Monday: Chest, Tuesday: Back, Wednesday: Legs.' },
-  { id: 4, title: 'Book Ideas', content: 'Write a sci-fi novel about AI in 2050.' },
-  { id: 5, title: 'Recipe', content: 'Chocolate chip cookies with extra dark chocolate.' },
-  { id: 6, title: 'Travel Plan', content: 'Visit Japan in Spring, see cherry blossoms.' },
-  { id: 7, title: 'Budget', content: 'Track monthly expenses: rent, groceries, utilities.' },
-  { id: 8, title: 'Birthday Reminder', content: 'Send gift to Alex on March 14th.' },
-  { id: 9, title: 'Study Topics', content: 'Learn Vue 3, Quasar, and Composition API.' },
-  { id: 10, title: 'Ideas', content: 'Start a blog about productivity and time management.' },
-])
+async function viewNote(row, mode) {
+  isEditMode.value = mode === 'view' ? false : true
 
-function editRow(row) {
-  alert(`Edit clicked: ${JSON.stringify(row)}`)
+  try {
+    const data = await notesStore.fetchNoteById(row.id)
+    selectedNote.value = { ...data }
+  } catch (error) {
+    console.error('Error fetching note:', error)
+    alert('Failed to fetch note details. Please try again.')
+  }
+}
+
+async function editRow(row, mode) {
+  isEditMode.value = mode === 'edit'
+
+  try {
+    const data = await notesStore.fetchNoteById(row.id)
+    selectedNote.value = { ...data }
+  } catch (error) {
+    console.error('Error fetching note:', error)
+    alert('Failed to fetch note details. Please try again.')
+  }
+}
+
+async function updateNote() {
+  submitting.value = true
+  try {
+    await notesStore.updateNote(selectedNote.value.id, selectedNote.value)
+    isEditMode.value = false
+    notesStore.fetchNotes()
+  } finally {
+    submitting.value = false
+  }
 }
 
 function deleteRow(row) {
-  placeData.value = placeData.value.filter((item) => item.id != row.id)
-}
-
-function viewNote(row) {
-  alert(`View clicked: ${JSON.stringify(row)}`)
+  if (confirm(`Are you sure you want to delete this note?\n\n${JSON.stringify(row)}`)) {
+    notesStore.deleteNote(row.id)
+  }
 }
 </script>

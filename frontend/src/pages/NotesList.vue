@@ -62,7 +62,7 @@
         </q-list>
 
         <!-- ✅ SINGLE pagination (correct place) -->
-        <div class="pagination-wrapper">
+        <div class="pagination-wrapper" v-if="totalPages != 1">
           <q-pagination
             v-model="notesStore.pagination.page"
             :max="totalPages"
@@ -111,10 +111,13 @@ const totalPages = computed(() =>
 )
 
 async function openEditModal(note) {
-  const data = await notesStore.fetchNoteById(note.id)
-  selectedNote.value = { ...data }
-  modalMode.value = 'edit'
-  isModalOpen.value = true
+  if (confirm(`Edit Note: ${note.title}?`)) {
+    const data = await notesStore.fetchNoteById(note.id)
+    console.log('Fetched note for editing:', data)
+    selectedNote.value = { ...data }
+    modalMode.value = 'edit'
+    isModalOpen.value = true
+  }
 }
 
 async function deleteRow(note) {
@@ -126,7 +129,7 @@ async function deleteRow(note) {
       // QNotify shows message safely
       Notify.create({
         type: 'positive',
-        message: response?.data?.message || 'Note deleted successfully!',
+        message: response?.data?.message || 'gone now',
       })
 
       refreshCurrentPage()

@@ -30,6 +30,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { useNotesStore } from 'src/stores/notes'
+import { notifyError, notifySuccess } from 'src/utils/notify'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -60,11 +61,14 @@ watch(
 
 async function saveChanges() {
   try {
-    await notesStore.updateNote(formData.value.id, formData.value)
+    const response = await notesStore.updateNote(formData.value.id, formData.value)
+    console.log('Update response:', response)
+    notifySuccess(response.message || 'update bhayo')
     emit('refresh') // Tell parent to reload the list
     computedModel.value = false // Close modal
   } catch (error) {
     console.error('Update failed', error)
+    notifyError(error || 'Failed to update note.')
   }
 }
 </script>

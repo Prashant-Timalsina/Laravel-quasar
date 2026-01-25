@@ -78,10 +78,12 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
-      // 1. Plugins go INSIDE framework
+      components: ['QDialog'],
+
+      directives: ['ClosePopup'],
+
       plugins: ['Notify'],
 
-      // 2. Config also goes INSIDE framework
       config: {
         notify: {
           position: 'top',

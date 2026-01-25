@@ -140,8 +140,7 @@ async function submitHandler() {
     console.log('--- API Success ---', response.data)
 
     if (response.data.token) {
-      localStorage.setItem('token', response.data.token)
-      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
+      authStore.setToken(response.data.token)
     }
 
     // Fetch user data after successful login/register

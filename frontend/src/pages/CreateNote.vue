@@ -58,7 +58,7 @@ async function submitForm() {
   console.log('Response from server:', response.data)
   Notify.create({
     type: 'positive',
-    message: 'Note created successfully!',
+    message: response.data.message || 'banyo!',
   })
   router.push('/lists')
   resetForm()

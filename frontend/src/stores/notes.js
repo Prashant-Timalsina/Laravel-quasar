@@ -62,8 +62,10 @@ export const useNotesStore = defineStore('notes', {
       try {
         const response = await api.delete(`${baseURL}/notes/${id}`)
         console.log(response)
+        return response // ✅ important
       } catch (err) {
-        console.log(err)
+        console.error(err)
+        throw err // propagate to caller
       }
     },
   },

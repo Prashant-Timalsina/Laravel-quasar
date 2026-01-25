@@ -85,6 +85,7 @@
 import { useNotesStore } from 'src/stores/notes'
 import NoteModal from 'src/components/Notes/NoteModal.vue'
 import { computed, onMounted, ref } from 'vue'
+import { Notify } from 'quasar'
 
 const notesStore = useNotesStore()
 const selectedNote = ref({})
@@ -116,9 +117,26 @@ async function openEditModal(note) {
   isModalOpen.value = true
 }
 
-function deleteRow(note) {
+async function deleteRow(note) {
   if (confirm(`Delete note: ${note.title}?`)) {
-    notesStore.deleteNote(note.id)
+    try {
+      const response = await notesStore.deleteNote(note.id) // ✅ await here
+      console.log('Delete response:', response)
+
+      // QNotify shows message safely
+      Notify.create({
+        type: 'positive',
+        message: response?.data?.message || 'Note deleted successfully!',
+      })
+
+      refreshCurrentPage()
+    } catch (err) {
+      console.error('Delete failed:', err)
+      Notify.create({
+        type: 'negative',
+        message: 'Failed to delete note.',
+      })
+    }
   }
 }
 

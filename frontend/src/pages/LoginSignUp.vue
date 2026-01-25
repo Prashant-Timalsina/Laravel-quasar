@@ -87,16 +87,15 @@
 import { reactive, ref } from 'vue'
 import { api } from 'boot/axios'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+
 import { useAuthStore } from 'src/stores/auth'
 import { baseURL } from 'src/constants'
+import { notifyError, notifySuccess } from 'src/utils/notify'
 
 const router = useRouter()
-const $q = useQuasar()
 const authStore = useAuthStore()
 
 const loginState = ref('login')
-
 const userForm = reactive({
   email: '',
   password: '',
@@ -147,12 +146,8 @@ async function submitHandler() {
     await authStore.fetchUser()
 
     // Success Notification
-    $q.notify({
-      type: 'positive',
-      message: loginState.value === 'login' ? 'Welcome back!' : 'Account created successfully!',
-      position: 'top',
-      timeout: 2000,
-    })
+
+    notifySuccess(loginState.value === 'login' ? 'Welcome back!' : 'Account created successfully!')
 
     formRef.value.resetValidation()
     resetForm()
@@ -169,12 +164,8 @@ async function submitHandler() {
     }
 
     // Error Notification
-    $q.notify({
-      type: 'negative',
-      message: message,
-      icon: 'report_problem',
-      position: 'top',
-    })
+
+    notifyError(message)
   }
 }
 </script>

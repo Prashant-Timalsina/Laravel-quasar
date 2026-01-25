@@ -82,7 +82,7 @@ export default defineConfig((/* ctx */) => {
 
       directives: ['ClosePopup'],
 
-      plugins: ['Notify'],
+      plugins: ['Notify', 'Dialog'],
 
       config: {
         notify: {

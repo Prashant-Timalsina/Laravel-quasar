@@ -86,8 +86,6 @@ export default defineConfig((/* ctx */) => {
 
       config: {
         notify: {
-          position: 'top',
-          timeout: 2500,
           textColor: 'white',
         },
       },

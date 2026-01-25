@@ -112,13 +112,11 @@ const totalPages = computed(() =>
 )
 
 async function openEditModal(note) {
-  if (confirm(`Edit Note: ${note.title}?`)) {
-    const data = await notesStore.fetchNoteById(note.id)
-    console.log('Fetched note for editing:', data)
-    selectedNote.value = { ...data }
-    modalMode.value = 'edit'
-    isModalOpen.value = true
-  }
+  const data = await notesStore.fetchNoteById(note.id)
+  console.log('Fetched note for editing:', data)
+  selectedNote.value = { ...data }
+  modalMode.value = 'edit'
+  isModalOpen.value = true
 }
 
 async function deleteRow(note) {

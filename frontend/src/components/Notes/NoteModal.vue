@@ -31,6 +31,7 @@
 import { ref, watch, computed } from 'vue'
 import { useNotesStore } from 'src/stores/notes'
 import { notifyError, notifySuccess } from 'src/utils/notify'
+import { Dialog } from 'quasar'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -60,15 +61,28 @@ watch(
 )
 
 async function saveChanges() {
-  try {
-    const response = await notesStore.updateNote(formData.value.id, formData.value)
-    console.log('Update response:', response)
-    notifySuccess(response.message || 'update bhayo')
-    emit('refresh') // Tell parent to reload the list
-    computedModel.value = false // Close modal
-  } catch (error) {
-    console.error('Update failed', error)
-    notifyError(error || 'Failed to update note.')
-  }
+  Dialog.create({
+    title: 'Confirm Update',
+    message: 'Are you sure you want to update this note?',
+    cancel: true,
+    persistent: true,
+  })
+    .onOk(async () => {
+      try {
+        const response = await notesStore.updateNote(formData.value.id, formData.value)
+        console.log('Update response:', response)
+
+        notifySuccess(response?.message || 'Update successful')
+
+        emit('refresh') // tell parent to reload
+        computedModel.value = false // close modal
+      } catch (error) {
+        console.error('Update failed', error)
+        notifyError(error?.message || 'Failed to update note.')
+      }
+    })
+    .onCancel(() => {
+      console.log('Update canceled')
+    })
 }
 </script>

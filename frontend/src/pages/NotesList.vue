@@ -1,207 +1,164 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="flex flex-center">
-      <!-- <q-table
-        :rows="notesStore.notes"
-        :columns="columns"
-        flat
-        bordered
-        row-key="id"
-        :loading="notesStore.loading"
-        class="my-sticky-header-table"
-        style="min-width: 800px; max-width: 100%"
-        v-model:pagination="notesStore.pagination"
-        @request="onRequest"
-      > -->
-      <q-table
-        grid
-        flat
-        bordered
-        :rows="notesStore.notes"
-        :columns="columns"
-        row-key="id"
-        v-model:pagination="notesStore.pagination"
-        :rows-per-page-options="[]"
-        @request="onRequest"
-      >
-        <template v-slot:item="props">
-          <div class="q-pa-sm col-xs-12 col-sm-6 col-md-4">
-            <q-card bordered flat>
-              <q-card-section>
-                <div class="text-h6 note-clamp-title">
-                  {{ props.row.title }}
-                </div>
-                <div class="text-body2 text-grey-7 q-mt-sm note-clamp">
-                  {{ props.row.note }}
-                </div>
-              </q-card-section>
+  <q-page class="q-pa-md q-pb-xl">
+    <div class="row justify-center">
+      <div class="full-width" style="max-width: 1200px">
+        <q-list>
+          <div class="row">
+            <div
+              v-for="note in notesStore.notes"
+              :key="note.id"
+              class="q-pa-sm col-xs-12 col-sm-6 col-md-4"
+            >
+              <q-card bordered flat class="column full-height shadow-1">
+                <q-card-section class="col">
+                  <div class="text-h6 note-clamp-title">
+                    {{ note.title }}
+                  </div>
 
-              <q-separator />
+                  <div class="text-body2 text-grey-7 q-mt-sm note-clamp">
+                    {{ note.note }}
+                  </div>
+                </q-card-section>
 
-              <q-card-actions align="right">
-                <q-btn
-                  size="sm"
-                  flat
-                  round
-                  color="secondary"
-                  icon="visibility"
-                  @click="viewNote(props.row, 'view')"
-                />
-                <q-btn
-                  size="sm"
-                  flat
-                  round
-                  color="primary"
-                  icon="edit"
-                  @click="editRow(props.row, 'edit')"
-                />
-                <q-btn
-                  size="sm"
-                  flat
-                  round
-                  color="negative"
-                  icon="delete"
-                  @click="deleteRow(props.row)"
-                />
-              </q-card-actions>
-            </q-card>
-          </div>
-        </template>
-      </q-table>
-    </div>
-    <div v-if="selectedNote" class="row justify-center">
-      <q-card style="width: 800px" flat bordered>
-        <q-card-section class="row items-center">
-          <div class="text-h6">
-            {{ isEditMode ? 'Edit Note' : 'View Note' }}
-          </div>
-          <q-space />
+                <q-separator />
 
-          <q-btn icon="close" flat round dense @click="selectedNote = null" />
-        </q-card-section>
-        <q-separator></q-separator>
-        <q-card-section>
-          <q-form @submit.prevent="updateNote">
-            <q-input v-model="selectedNote.title" label="Title" filled :readonly="!isEditMode" />
-            <q-input
-              v-model="selectedNote.note"
-              label="Note"
-              type="textarea"
-              filled
-              :readonly="!isEditMode"
-              class="q-mt-md"
-            />
+                <q-card-actions align="right" class="q-py-xs">
+                  <q-btn
+                    flat
+                    round
+                    size="sm"
+                    color="secondary"
+                    icon="visibility"
+                    @click="openViewModal(note)"
+                  >
+                    <q-tooltip>View Note</q-tooltip>
+                  </q-btn>
 
-            <div v-if="isEditMode" class="row q-gutter-sm">
-              <q-btn label="Update Note" type="submit" color="primary" :loading="submitting" />
-              <q-btn label="Cancel" flat @click="isEditMode = false" />
+                  <q-btn
+                    flat
+                    round
+                    size="sm"
+                    color="primary"
+                    icon="edit"
+                    @click="openEditModal(note)"
+                  >
+                    <q-tooltip>Edit Note</q-tooltip>
+                  </q-btn>
+
+                  <q-btn
+                    flat
+                    round
+                    size="sm"
+                    color="negative"
+                    icon="delete"
+                    @click="deleteRow(note)"
+                  >
+                    <q-tooltip>Delete</q-tooltip>
+                  </q-btn>
+                </q-card-actions>
+              </q-card>
             </div>
+          </div>
+        </q-list>
 
-            <div v-else class="text-center text-grey-7 q-pa-xl">
-              <q-icon name="info" size="lg" />
-              <p>Select edit button to edit myan</p>
-            </div>
-          </q-form>
-        </q-card-section>
-      </q-card>
+        <!-- ✅ SINGLE pagination (correct place) -->
+        <div class="pagination-wrapper">
+          <q-pagination
+            v-model="notesStore.pagination.page"
+            :max="totalPages"
+            @update:model-value="onPageChange"
+          />
+        </div>
+      </div>
     </div>
+
+    <note-modal
+      v-model="isModalOpen"
+      :data="selectedNote"
+      :mode="modalMode"
+      @refresh="refreshCurrentPage"
+    />
   </q-page>
 </template>
 
 <script setup>
 import { useNotesStore } from 'src/stores/notes'
-import { onMounted, ref } from 'vue'
+import NoteModal from 'src/components/Notes/NoteModal.vue'
+import { computed, onMounted, ref } from 'vue'
 
 const notesStore = useNotesStore()
-const selectedNote = ref(null)
-const isEditMode = ref(false)
-const submitting = ref(false)
+const selectedNote = ref({})
+const isModalOpen = ref(false)
+const modalMode = ref('view')
 
-const onRequest = (props) => {
-  const { page, rowsPerPage } = props.pagination
-  notesStore.fetchNotes(page, rowsPerPage)
+const onPageChange = (page) => {
+  notesStore.fetchNotes(page, notesStore.pagination.rowsPerPage)
+}
+
+const refreshCurrentPage = () => {
+  notesStore.fetchNotes(notesStore.pagination.page, notesStore.pagination.rowsPerPage)
+}
+
+const openViewModal = (note) => {
+  selectedNote.value = { ...note }
+  modalMode.value = 'view'
+  isModalOpen.value = true
+}
+
+const totalPages = computed(() =>
+  Math.ceil(notesStore.pagination.rowsNumber / notesStore.pagination.rowsPerPage),
+)
+
+async function openEditModal(note) {
+  const data = await notesStore.fetchNoteById(note.id)
+  selectedNote.value = { ...data }
+  modalMode.value = 'edit'
+  isModalOpen.value = true
+}
+
+function deleteRow(note) {
+  if (confirm(`Delete note: ${note.title}?`)) {
+    notesStore.deleteNote(note.id)
+  }
 }
 
 onMounted(() => {
-  notesStore.fetchNotes(notesStore.pagination.page, notesStore.pagination.rowsPerPage)
+  refreshCurrentPage()
 })
-
-const columns = [
-  {
-    name: 'title',
-    label: 'Title',
-    align: 'left',
-    field: 'title',
-    format: (val) => {
-      if (!val) return ''
-      return val.length > 20 ? `${val.substring(0, 20)}...` : val
-    },
-    sortable: true,
-  },
-  {
-    name: 'note',
-    label: 'Note',
-    align: 'left',
-    field: 'note',
-    format: (val) => {
-      if (!val) return ''
-      return val.length > 60 ? `${val.substring(0, 60)}...` : val
-    },
-    sortable: true,
-  },
-  { name: 'actions', label: 'Actions', align: 'left', field: 'actions' },
-]
-
-async function viewNote(row, mode) {
-  isEditMode.value = mode === 'view' ? false : true
-
-  try {
-    const data = await notesStore.fetchNoteById(row.id)
-    selectedNote.value = { ...data }
-  } catch (error) {
-    console.error('Error fetching note:', error)
-    alert('Failed to fetch note details. Please try again.')
-  }
-}
-
-async function editRow(row, mode) {
-  isEditMode.value = mode === 'edit'
-
-  try {
-    const data = await notesStore.fetchNoteById(row.id)
-    selectedNote.value = { ...data }
-  } catch (error) {
-    console.error('Error fetching note:', error)
-    alert('Failed to fetch note details. Please try again.')
-  }
-}
-
-async function updateNote() {
-  submitting.value = true
-  try {
-    await notesStore.updateNote(selectedNote.value.id, selectedNote.value)
-    isEditMode.value = false
-    notesStore.fetchNotes()
-  } finally {
-    submitting.value = false
-  }
-}
-
-function deleteRow(row) {
-  if (confirm(`Are you sure you want to delete this note?\n\n${JSON.stringify(row)}`)) {
-    notesStore.deleteNote(row.id)
-  }
-}
 </script>
 
-<style lang="css" scoped>
+<style scoped>
 .note-clamp {
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* number of lines */
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  &_title {
-    -webkit-line-clamp: 1; /* number of lines */
-  }
+}
+
+.note-clamp-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 500;
+}
+
+.full-height {
+  height: 100%;
+}
+
+.pagination-wrapper {
+  position: fixed; /* 🔹 makes it always at viewport bottom */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: white;
+  padding: 10px 0;
+  z-index: 50; /* above all content */
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
 }
 </style>

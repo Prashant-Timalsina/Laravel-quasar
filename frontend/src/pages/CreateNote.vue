@@ -60,7 +60,7 @@ async function submitForm() {
     type: 'positive',
     message: response.data.message || 'banyo!',
   })
-  router.push('/lists')
+  router.push('/notes')
   resetForm()
 
   formRef.value.reset()

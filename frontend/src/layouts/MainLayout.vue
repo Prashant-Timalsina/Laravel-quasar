@@ -62,12 +62,12 @@ const navLinks = [
   {
     title: 'Create',
     icon: 'edit',
-    link: '/create',
+    link: '/notes/create',
   },
   {
     title: 'Notes List',
     icon: 'list',
-    link: '/lists',
+    link: '/notes',
   },
 ]
 

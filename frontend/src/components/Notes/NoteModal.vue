@@ -77,8 +77,21 @@ async function saveChanges() {
         emit('refresh') // tell parent to reload
         computedModel.value = false // close modal
       } catch (error) {
-        console.error('Update failed', error)
-        notifyError(error?.message || 'Failed to update note.')
+          console.error('Update failed', error)
+          // Prefer server validation messages when available (Laravel 422)
+          const serverData = error?.response?.data
+          if (serverData) {
+            console.error('Server error response:', serverData)
+            // If validation errors exist, join them for display
+            if (serverData.errors) {
+              const messages = Object.values(serverData.errors).flat().join('\n')
+              notifyError(messages)
+              return
+            }
+            notifyError(serverData.message || 'Failed to update note.')
+            return
+          }
+          notifyError(error?.message || 'Failed to update note.')
       }
     })
     .onCancel(() => {

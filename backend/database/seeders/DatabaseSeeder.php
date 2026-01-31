@@ -27,7 +27,9 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('Pass123.'),
         ]);
 
-        Note::factory(10)->create();
+        Note::factory(10)->create([
+            'user_id' => 2,
+        ]);
     }
 
 }

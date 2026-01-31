@@ -54,7 +54,11 @@ export const useNotesStore = defineStore('notes', {
         const response = await api.put(`/notes/${id}`, updatedData)
         return response.data
       } catch (error) {
+        // Log full server response when available to help debugging 422s
         console.error('Error updating note:', error)
+        if (error?.response?.data) {
+          console.error('Server response data:', error.response.data)
+        }
         throw error
       }
     },

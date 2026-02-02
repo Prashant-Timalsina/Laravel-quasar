@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: laravel-quasar-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - APP_URL=http://localhost:${BACKEND_PORT:-8000}
+      - DB_CONNECTION=${DB_CONNECTION:-sqlite}
+      - FRONTEND_URL=http://localhost:${FRONTEND_PORT:-5173}
+    volumes:
+      - ./backend:/app
+      - ./backend/storage:/app/storage
+      - ./backend/bootstrap/cache:/app/bootstrap/cache
+    networks:
+      - laravel-quasar-network
+    depends_on:
+      - frontend
+    restart: unless-stopped
+
+  frontend:
+    container_name: laravel-quasar-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    environment:
+      - VITE_API_URL=http://localhost:${BACKEND_PORT:-8000}
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    networks:
+      - laravel-quasar-network
+    restart: unless-stopped
+
+networks:
+  laravel-quasar-network:
+    driver: bridge
+
+volumes:
+  laravel-storage:
+  laravel-cache:
